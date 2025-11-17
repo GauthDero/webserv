@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Index</title>
+	</head>
+	<body>
+		<hl1>Welcome to our webserv</hl1>
+		<p>Make yourself at home !</p>
+		<p>Do you want to upload something ?</p>
+		<form id="uploadForm" method="POST" enctype="multipart/form-data">
+			<label for="file">Choose a file:</label>
+			<input type="file" multiple id="file" name="file" required>
+			<button type="submit" >Send</button>
+		</form>
+		<p>Or maybe just navigate ? -> <button onclick="window.location.href='/resources/upload'"> See upload</button> </p>
+		<p>Want to test the CGI ? -> <button onclick="window.location.href='/cgi_bin/'"> Test </button></p>
+		<p>Or what about to get only the header ? -> <button onclick="sendHeadRequest()"> HEAD </button></p>
+		<p>Large block of data to send? Chunked request ! -> <button id="sendBtn">Chunked POST</button></p>
+		<script>
+
+			function sendHeadRequest() {
+				fetch('/resources', {
+					method: 'HEAD'
+				})
+				.then(response => {
+					if (response.ok) {
+						alert('Resource exists. Status: ' + response.status);
+					} else {
+						alert('Request failed. Status: ' + response.status);
+					}
+				})
+				.catch(error => {
+					console.error('Error:', error);
+				});
+			}
+
+			function generateRandomString(sizeInBytes) {
+				const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+				let result = "";
+				for (let i = 0; i < sizeInBytes; i++) {
+					result += chars.charAt(Math.floor(Math.random() * chars.length));
+				}
+				return result;
+			}
+
+			document.getElementById('uploadForm').addEventListener('submit', function(e) {
+				e.preventDefault(); // Prevent default form submission
+
+				const formData = new FormData(this);
+
+				fetch('/resources/upload', {
+					method: 'POST',
+					body: formData
+				})
+				.then(async data => {
+					console.log('Server response:', data);
+					if (data.ok) {
+						alert('Upload successful!');
+					} else {
+						const html = await data.text();
+						document.open();
+						document.write(html);
+						document.close();
+					}
+				})
+				.catch(error => {
+					console.error('Network error:', error);
+				});
+			});
+
+			document.getElementById("sendBtn").addEventListener("click", async () => {
+			try {
+				const response = await fetch("/cgi_bin/chunked.py", {
+					method: "POST",
+					body: generateRandomString(1000 * 1000), // 1 MB
+					headers: {
+						"Content-Type": "application/octet-stream"
+					}
+				});
+
+				console.log("Server response:", response);
+				const html = await response.text();
+				document.open();
+				document.write(html);
+				document.close();
+			} catch (error) {
+				console.error("Network error:", error);
+			}
+			});
+			</script>
+	</body>
+</html>

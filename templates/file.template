@@ -1,0 +1,66 @@
+
+#Main Block (not actually necessary, just here to looks like NGINX)
+http
+{
+	autoindex				on;
+	client_max_body_size	1M;
+	default_type			text/plain;
+
+	types
+	{
+		text/html			html htm;
+		text/css			css;
+		application/json	json;
+	}
+
+	# virtual server. multiple servers are allowed
+	server
+	{
+		error_page 404	{{ROOT}}/pages/resources/errors/404.html;
+		error_page 403	{{ROOT}}/pages/resources/errors/403.html;
+		root			"{{ROOT}}/pages";
+		index			"index.html";
+
+		listen 9999;
+
+		location /
+		{
+			return 301 http://localhost:9999/resources;
+		}
+
+		location /favicon.ico
+		{
+			root	"{{ROOT}}/pages/resources";
+		}
+
+		location /cgi_bin/
+		{
+			limit_except	GET POST;
+			root	{{ROOT}};
+			cgi py
+			{
+				pass 				/etc/bin/python;
+				execution_timeout	5;
+				use_shebang			on;
+			}
+
+			cgi	php
+			{
+				pass				/usr/bin/php;
+				execution_timeout	30;
+				use_shebang			off;
+			}
+
+			cgi sh
+			{
+				pass				/usr/bin/bash;
+				use_shebang			on;
+			}
+		}
+
+		location /resources
+		{
+			autoindex		on;
+		}
+	}
+}

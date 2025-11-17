@@ -1,0 +1,51 @@
+
+http
+{
+	types
+	{
+		text/html								html htm shtml;
+		text/css								css;
+		text/xml								xml;
+		image/gif								gif;
+		image/jpeg								jpeg jpg;
+		application/javascript					js;
+		text/plain								txt;
+
+		image/png								png;
+		image/svg+xml							svg svgz;
+		image/webp								webp;
+		image/x-icon							ico;
+
+		font/woff								woff;
+		font/woff2								woff2;
+
+		application/json						json;
+		application/pdf							pdf;
+		application/vnd.ms-powerpoint			ppt;
+
+		application/x-7z-compressed				7z;
+		application/x-rar-compressed			rar;
+		application/x-redhat-package-manager	rpm;
+		application/zip							zip;
+
+		application/octet-stream				bin exe dll;
+		application/octet-stream				deb;
+		application/octet-stream				dmg;
+		application/octet-stream				iso img;
+		application/octet-stream				msi msp msm;
+	}
+
+	default_type	text/html;
+
+	server
+	{
+		listen 9999;
+
+		location /
+		{
+			autoindex	off;
+			root		{{ROOT}}/pages/test/;
+			index		index.html;
+		}
+	}
+}

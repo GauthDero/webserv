@@ -1,0 +1,86 @@
+#Main Block (not actually necessary, just here to looks like NGINX)
+http
+{
+	# Bad values, fill them up late
+	autoindex				on;
+	index					"File1" "File2";
+	root					"/home";
+	alias					"servWeb";
+	error_page				200 notExist;
+	client_max_body_size	128k; # 128kb
+	default_type			text/plain;
+
+	types
+	{
+		text/html			html htm;
+		text/css			css;
+		application/json	json;
+	}
+
+	#inherits all the properties from above.
+	#Listen to 0.0.0.0:8080
+	server
+	{
+	}
+
+	# Second server, all properties overrided
+	server
+	{
+		listen 9999;			# Default IP: 0.0.0.0
+		#listen 127.0.0.10;		# Default port is 8080
+		listen 127.0.0.1:9090;
+
+		#server_name				"Mypage"; #Removed for being useless
+		root					"{{ROOT}}/pages";
+		index					"index.html" "index2" "index3";
+		alias					"webserv";
+		default_type			text/plain;
+		autoindex				off;
+		client_max_body_size	15M; # 15Mb
+
+		types #Override types block
+		{
+			text/html		html;
+			text/css		css;
+			whatever/iwant	extent;
+		}
+
+		#error pages are inherited always.
+		#Only accepts absolute paths
+		error_page 404 {{ROOT}}/resources/errors/404.html;
+		error_page 403 {{ROOT}}/resources/errors/403.html;
+		error_page 400 {{ROOT}}/resources/errors/400.html;
+
+		return 300 "localhost:8080/";	# In case no location block matches the URI, redirect
+										# This is the only property that is not inherited
+
+		location "/"
+		{
+			autoindex on;
+		}
+
+		location "/favicon.ico" # inherits all from this server block
+		{
+			limit_except GET;
+		}
+
+		location "/resources" # overrides all
+		{
+			root 					"{{ROOT}}/pages";
+			alias					"foo";
+			index					"index.html";
+			autoindex				off;
+			default_type			text/css;
+			client_max_body_size	1G; # 1Gb
+
+			types
+			{
+				yeeees/noooo	avi;
+			}
+
+			error_page 40400 find/me.html;
+
+			limit_except GET DELETE POST;
+		}
+	}
+}

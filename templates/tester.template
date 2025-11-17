@@ -1,0 +1,41 @@
+http
+{
+	server
+	{
+		listen 9999;
+		client_max_body_size	101M;
+
+		alias	{{ROOT}}/YoupiBanane;
+
+		cgi	bla
+		{
+			pass				{{ROOT}}/ubuntu_cgi_tester;
+			execution_timeout	1;
+			use_shebang			off;
+		}
+
+		#Put whatever is necessary to get a 200 status code
+		location /
+		{
+			limit_except	GET;
+			default_type	text/html;
+			root			{{ROOT}}/pages/resources;
+			index			index.html;
+		}
+
+		location /put_test/
+		{
+			limit_except	POST;
+		}
+
+		location /post_body
+		{
+			client_max_body_size	100;
+		}
+
+		location /directory
+		{
+			index	youpi.bad_extension;
+		}
+	}
+}
